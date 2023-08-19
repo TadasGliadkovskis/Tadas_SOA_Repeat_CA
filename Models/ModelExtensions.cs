@@ -31,7 +31,7 @@ public static class ModelExtensions
         {
             Id = game.Id,
             Name = game.Name,
-            Publisher = game.Publisher,
+            Publisher = game.Publisher?.Name,
             Developer = game.Developer?.Name,
             ReleaseDate = game.ReleaseDate,
             Owned = game.Owned,
@@ -39,5 +39,26 @@ public static class ModelExtensions
         };
     }
 
+    public static DevDTO ToDTO(this Developer developer)
+    {
+        if (developer == null) return null;
+
+        return new DevDTO
+        {
+            Id = developer.Id,
+            Name = developer.Name,
+        };
+    }
+
+    public static PubDTO ToDTO(this Publisher publisher)
+    {
+        if (publisher == null) return null;
+
+        return new PubDTO
+        {
+            Id = publisher.Id,
+            Name = publisher.Name,
+        };
+    }
 }
 

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Tadas_SOA_Repeat_CA.Migrations
 {
     /// <inheritdoc />
-    public partial class revertlastmigration : Migration
+    public partial class initMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,21 +16,21 @@ namespace Tadas_SOA_Repeat_CA.Migrations
                 keyColumn: "Id",
                 keyValue: 1,
                 column: "RecordCreationDate",
-                value: new DateTime(2023, 8, 11, 9, 33, 47, 16, DateTimeKind.Local).AddTicks(8214));
+                value: new DateTime(2023, 8, 15, 21, 54, 22, 102, DateTimeKind.Local).AddTicks(6059));
 
             migrationBuilder.UpdateData(
                 table: "Games",
                 keyColumn: "Id",
                 keyValue: 2,
                 column: "RecordCreationDate",
-                value: new DateTime(2023, 8, 11, 9, 33, 47, 16, DateTimeKind.Local).AddTicks(8285));
+                value: new DateTime(2023, 8, 15, 21, 54, 22, 102, DateTimeKind.Local).AddTicks(6120));
 
             migrationBuilder.UpdateData(
                 table: "Games",
                 keyColumn: "Id",
                 keyValue: 3,
                 column: "RecordCreationDate",
-                value: new DateTime(2023, 8, 11, 9, 33, 47, 16, DateTimeKind.Local).AddTicks(8289));
+                value: new DateTime(2023, 8, 15, 21, 54, 22, 102, DateTimeKind.Local).AddTicks(6135));
         }
 
         /// <inheritdoc />
@@ -41,21 +41,21 @@ namespace Tadas_SOA_Repeat_CA.Migrations
                 keyColumn: "Id",
                 keyValue: 1,
                 column: "RecordCreationDate",
-                value: new DateTime(2023, 8, 11, 9, 21, 10, 681, DateTimeKind.Local).AddTicks(711));
+                value: new DateTime(2023, 8, 15, 21, 8, 2, 559, DateTimeKind.Local).AddTicks(5252));
 
             migrationBuilder.UpdateData(
                 table: "Games",
                 keyColumn: "Id",
                 keyValue: 2,
                 column: "RecordCreationDate",
-                value: new DateTime(2023, 8, 11, 9, 21, 10, 681, DateTimeKind.Local).AddTicks(759));
+                value: new DateTime(2023, 8, 15, 21, 8, 2, 559, DateTimeKind.Local).AddTicks(5340));
 
             migrationBuilder.UpdateData(
                 table: "Games",
                 keyColumn: "Id",
                 keyValue: 3,
                 column: "RecordCreationDate",
-                value: new DateTime(2023, 8, 11, 9, 21, 10, 681, DateTimeKind.Local).AddTicks(761));
+                value: new DateTime(2023, 8, 15, 21, 8, 2, 559, DateTimeKind.Local).AddTicks(5356));
         }
     }
 }

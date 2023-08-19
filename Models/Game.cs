@@ -10,6 +10,12 @@ namespace Tadas_SOA_Repeat_CA.Models
         public string Name { get; set; }
     }
 
+    public class Publisher
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+    }
+
     public class Game
     {
         [Key]
@@ -32,7 +38,8 @@ namespace Tadas_SOA_Repeat_CA.Models
                 CategoriesJson = JsonConvert.SerializeObject(value);
             }
         }
-        public string Publisher { get; set; }
+        public int PublisherId { get; set; }
+        public Publisher Publisher { get; set; }
         public int DeveloperId { get; set; }
         public Developer Developer { get; set; }
         public bool Owned { get; set; }

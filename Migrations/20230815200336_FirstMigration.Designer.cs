@@ -12,8 +12,8 @@ using Tadas_SOA_Repeat_CA.Data;
 namespace Tadas_SOA_Repeat_CA.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230811070704_updatedDeveloper")]
-    partial class updatedDeveloper
+    [Migration("20230815200336_FirstMigration")]
+    partial class FirstMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace Tadas_SOA_Repeat_CA.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Tadas_SOA_Repeat_CA.Models.AllCategories", b =>
+            modelBuilder.Entity("Tadas_SOA_Repeat_CA.Models.Category", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -33,16 +33,11 @@ namespace Tadas_SOA_Repeat_CA.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("GameId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("category")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("GameId");
 
                     b.ToTable("Categories");
 
@@ -50,27 +45,27 @@ namespace Tadas_SOA_Repeat_CA.Migrations
                         new
                         {
                             Id = 1,
-                            category = "Platform"
+                            Name = "Platform"
                         },
                         new
                         {
                             Id = 2,
-                            category = "Adventure"
+                            Name = "Adventure"
                         },
                         new
                         {
                             Id = 3,
-                            category = "Action"
+                            Name = "Action"
                         },
                         new
                         {
                             Id = 4,
-                            category = "Sandbox"
+                            Name = "Sandbox"
                         },
                         new
                         {
                             Id = 5,
-                            category = "Survival"
+                            Name = "Survival"
                         });
                 });
 
@@ -111,6 +106,10 @@ namespace Tadas_SOA_Repeat_CA.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("CategoriesJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("DeveloperId")
                         .HasColumnType("int");
 
@@ -121,9 +120,8 @@ namespace Tadas_SOA_Repeat_CA.Migrations
                     b.Property<bool>("Owned")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Publisher")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("PublisherId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("RecordCreationDate")
                         .HasColumnType("datetime2");
@@ -135,93 +133,73 @@ namespace Tadas_SOA_Repeat_CA.Migrations
 
                     b.HasIndex("DeveloperId");
 
+                    b.HasIndex("PublisherId");
+
                     b.ToTable("Games");
 
                     b.HasData(
                         new
                         {
                             Id = 1,
+                            CategoriesJson = "[\"Platform\",\"Action\"]",
                             DeveloperId = 1,
                             Name = "Super Mario Bros.",
                             Owned = true,
-                            Publisher = "Nintendo",
-                            RecordCreationDate = new DateTime(2023, 8, 11, 8, 7, 4, 30, DateTimeKind.Local).AddTicks(9726),
+                            PublisherId = 1,
+                            RecordCreationDate = new DateTime(2023, 8, 15, 21, 3, 36, 858, DateTimeKind.Local).AddTicks(327),
                             ReleaseDate = new DateTime(1985, 9, 13, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = 2,
+                            CategoriesJson = "[\"Adventure\",\"Action\"]",
                             DeveloperId = 1,
                             Name = "The Legend of Zelda: Breath of the Wild",
                             Owned = true,
-                            Publisher = "Nintendo",
-                            RecordCreationDate = new DateTime(2023, 8, 11, 8, 7, 4, 30, DateTimeKind.Local).AddTicks(9775),
+                            PublisherId = 1,
+                            RecordCreationDate = new DateTime(2023, 8, 15, 21, 3, 36, 858, DateTimeKind.Local).AddTicks(387),
                             ReleaseDate = new DateTime(2017, 3, 3, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = 3,
+                            CategoriesJson = "[\"Sandbox\",\"Survival\"]",
                             DeveloperId = 2,
                             Name = "Minecraft",
                             Owned = false,
-                            Publisher = "Mojang",
-                            RecordCreationDate = new DateTime(2023, 8, 11, 8, 7, 4, 30, DateTimeKind.Local).AddTicks(9777),
+                            PublisherId = 2,
+                            RecordCreationDate = new DateTime(2023, 8, 15, 21, 3, 36, 858, DateTimeKind.Local).AddTicks(446),
                             ReleaseDate = new DateTime(2011, 11, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
 
-            modelBuilder.Entity("Tadas_SOA_Repeat_CA.Models.GameCategory", b =>
+            modelBuilder.Entity("Tadas_SOA_Repeat_CA.Models.Publisher", b =>
                 {
-                    b.Property<int>("GameId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.HasKey("GameId", "CategoryId");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("CategoryId");
+                    b.HasKey("Id");
 
-                    b.ToTable("GameCategories");
+                    b.ToTable("Publishers");
 
                     b.HasData(
                         new
                         {
-                            GameId = 1,
-                            CategoryId = 1
+                            Id = 1,
+                            Name = "Nintendo"
                         },
                         new
                         {
-                            GameId = 1,
-                            CategoryId = 2
-                        },
-                        new
-                        {
-                            GameId = 2,
-                            CategoryId = 2
-                        },
-                        new
-                        {
-                            GameId = 2,
-                            CategoryId = 3
-                        },
-                        new
-                        {
-                            GameId = 3,
-                            CategoryId = 4
-                        },
-                        new
-                        {
-                            GameId = 3,
-                            CategoryId = 5
+                            Id = 2,
+                            Name = "Mojang"
                         });
-                });
-
-            modelBuilder.Entity("Tadas_SOA_Repeat_CA.Models.AllCategories", b =>
-                {
-                    b.HasOne("Tadas_SOA_Repeat_CA.Models.Game", null)
-                        .WithMany("Categories")
-                        .HasForeignKey("GameId");
                 });
 
             modelBuilder.Entity("Tadas_SOA_Repeat_CA.Models.Game", b =>
@@ -232,38 +210,15 @@ namespace Tadas_SOA_Repeat_CA.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Tadas_SOA_Repeat_CA.Models.Publisher", "Publisher")
+                        .WithMany()
+                        .HasForeignKey("PublisherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Developer");
-                });
 
-            modelBuilder.Entity("Tadas_SOA_Repeat_CA.Models.GameCategory", b =>
-                {
-                    b.HasOne("Tadas_SOA_Repeat_CA.Models.AllCategories", "Category")
-                        .WithMany("GameCategories")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Tadas_SOA_Repeat_CA.Models.Game", "Game")
-                        .WithMany("GameCategories")
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Category");
-
-                    b.Navigation("Game");
-                });
-
-            modelBuilder.Entity("Tadas_SOA_Repeat_CA.Models.AllCategories", b =>
-                {
-                    b.Navigation("GameCategories");
-                });
-
-            modelBuilder.Entity("Tadas_SOA_Repeat_CA.Models.Game", b =>
-                {
-                    b.Navigation("Categories");
-
-                    b.Navigation("GameCategories");
+                    b.Navigation("Publisher");
                 });
 #pragma warning restore 612, 618
         }

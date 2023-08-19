@@ -12,9 +12,20 @@ namespace Tadas_SOA_Repeat_CA.Models.Dto
         [Required]
         public List<string> Categories { get; set; }
         public string Publisher { get; set; }
-        // Changed property name from Developer2 to Developer
         public string Developer { get; set; }
         public DateTime ReleaseDate { get; set; }
         public bool Owned { get; set; }
+    }
+
+    public class DevDTO
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+    }
+
+    public class PubDTO
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
     }
 }

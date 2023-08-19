@@ -117,9 +117,8 @@ namespace Tadas_SOA_Repeat_CA.Migrations
                     b.Property<bool>("Owned")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Publisher")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("PublisherId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("RecordCreationDate")
                         .HasColumnType("datetime2");
@@ -131,6 +130,8 @@ namespace Tadas_SOA_Repeat_CA.Migrations
 
                     b.HasIndex("DeveloperId");
 
+                    b.HasIndex("PublisherId");
+
                     b.ToTable("Games");
 
                     b.HasData(
@@ -141,8 +142,8 @@ namespace Tadas_SOA_Repeat_CA.Migrations
                             DeveloperId = 1,
                             Name = "Super Mario Bros.",
                             Owned = true,
-                            Publisher = "Nintendo",
-                            RecordCreationDate = new DateTime(2023, 8, 11, 10, 20, 20, 913, DateTimeKind.Local).AddTicks(8860),
+                            PublisherId = 1,
+                            RecordCreationDate = new DateTime(2023, 8, 15, 21, 54, 22, 102, DateTimeKind.Local).AddTicks(6059),
                             ReleaseDate = new DateTime(1985, 9, 13, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -152,8 +153,8 @@ namespace Tadas_SOA_Repeat_CA.Migrations
                             DeveloperId = 1,
                             Name = "The Legend of Zelda: Breath of the Wild",
                             Owned = true,
-                            Publisher = "Nintendo",
-                            RecordCreationDate = new DateTime(2023, 8, 11, 10, 20, 20, 913, DateTimeKind.Local).AddTicks(8921),
+                            PublisherId = 1,
+                            RecordCreationDate = new DateTime(2023, 8, 15, 21, 54, 22, 102, DateTimeKind.Local).AddTicks(6120),
                             ReleaseDate = new DateTime(2017, 3, 3, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
@@ -163,9 +164,38 @@ namespace Tadas_SOA_Repeat_CA.Migrations
                             DeveloperId = 2,
                             Name = "Minecraft",
                             Owned = false,
-                            Publisher = "Mojang",
-                            RecordCreationDate = new DateTime(2023, 8, 11, 10, 20, 20, 913, DateTimeKind.Local).AddTicks(8938),
+                            PublisherId = 2,
+                            RecordCreationDate = new DateTime(2023, 8, 15, 21, 54, 22, 102, DateTimeKind.Local).AddTicks(6135),
                             ReleaseDate = new DateTime(2011, 11, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        });
+                });
+
+            modelBuilder.Entity("Tadas_SOA_Repeat_CA.Models.Publisher", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Publishers");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Nintendo"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Mojang"
                         });
                 });
 
@@ -177,7 +207,15 @@ namespace Tadas_SOA_Repeat_CA.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Tadas_SOA_Repeat_CA.Models.Publisher", "Publisher")
+                        .WithMany()
+                        .HasForeignKey("PublisherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Developer");
+
+                    b.Navigation("Publisher");
                 });
 #pragma warning restore 612, 618
         }

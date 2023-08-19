@@ -7,7 +7,7 @@ using Tadas_SOA_Repeat_CA.Models.Dto;
 
 namespace Tadas_SOA_Repeat_CA.Controllers
 {
-    [Route("api/GamesAPI")]
+    [Route("api/TadasAPI/games")]
     [ApiController]
     public class GameController : ControllerBase
     {
@@ -27,6 +27,7 @@ namespace Tadas_SOA_Repeat_CA.Controllers
 
             var games = _context.Games
                                 .Include(g => g.Developer)
+                                .Include(g => g.Publisher)
                                 .ToList();
 
             var gameDTOs = games.Select(g => g.ToDTO()).ToList();
@@ -48,7 +49,7 @@ namespace Tadas_SOA_Repeat_CA.Controllers
             var game = _context.Games.FirstOrDefault(u => u.Id == id);
             if (game == null)
             {
-                return NotFound();
+                return NotFound($"Game with ID {id} not found.");
             }
             return Ok(game.ToDTO());
         }
@@ -64,7 +65,7 @@ namespace Tadas_SOA_Repeat_CA.Controllers
 
             if (await _context.Games.AnyAsync(g => g.Name.ToLower() == gameDTO.Name.ToLower()))
             {
-                ModelState.AddModelError("", "Game with this Name already exists");
+                ModelState.AddModelError("AlreadyExists", "Game with this Name already exists");
                 return BadRequest(ModelState);
             }
 
@@ -82,12 +83,25 @@ namespace Tadas_SOA_Repeat_CA.Controllers
                 await _context.SaveChangesAsync();
             }
 
+            var publisher = await _context.Publishers.FirstOrDefaultAsync(d => d.Name.ToLower() == gameDTO.Publisher.ToLower());
+            if (publisher == null)
+            {
+                publisher = new Publisher
+                {
+                    Name = gameDTO.Publisher
+                    // Add other properties if you have them in the DTO
+                };
+
+                await _context.Publishers.AddAsync(publisher);
+                await _context.SaveChangesAsync();
+            }
+
             // Create game with categories from DTO
             var game = new Game
             {
                 Name = gameDTO.Name,
                 Categories = gameDTO.Categories, // Directly assigning categories from DTO
-                Publisher = gameDTO.Publisher,
+                PublisherId = publisher.Id,
                 DeveloperId = developer.Id,
                 ReleaseDate = gameDTO.ReleaseDate,
                 Owned = gameDTO.Owned,
@@ -109,15 +123,16 @@ namespace Tadas_SOA_Repeat_CA.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult RemoveGame(int id)
         {
-            if (id == 0)
+            if (id <= 0)
             {
+                _logger.LogError("Delete Game Error with ID: " + id);
                 return BadRequest();
             }
 
             var game = _context.Games.FirstOrDefault(u => u.Id == id);
             if (game == null)
             {
-                return NotFound();
+                return NotFound($"Game with ID {id} not found.");
             }
 
             _context.Games.Remove(game);
@@ -137,10 +152,11 @@ namespace Tadas_SOA_Repeat_CA.Controllers
 
             var game = await _context.Games
                                      .Include(g => g.Developer)
+                                     .Include(g => g.Publisher)
                                      .FirstOrDefaultAsync(u => u.Id == id);
 
             if (game == null)
-                return NotFound();
+                return NotFound($"Game with ID {id} not found.");
 
             if (gameInfoFromRequest.Name != "string"
                 && gameInfoFromRequest.Developer != "string"
@@ -148,7 +164,6 @@ namespace Tadas_SOA_Repeat_CA.Controllers
             {
                 // Update basic properties
                 game.Name = gameInfoFromRequest.Name;
-                game.Publisher = gameInfoFromRequest.Publisher;
                 game.Owned = gameInfoFromRequest.Owned;
 
                 // Handle developer
@@ -165,6 +180,19 @@ namespace Tadas_SOA_Repeat_CA.Controllers
                 }
                 game.DeveloperId = developer.Id;
 
+                var publisher = await _context.Publishers.FirstOrDefaultAsync(d => d.Name.ToLower() == gameInfoFromRequest.Publisher.ToLower());
+                if (publisher == null)
+                {
+                    publisher = new Publisher
+                    {
+                        Name = gameInfoFromRequest.Publisher
+                        // Add other properties if you have them in the DTO
+                    };
+                    await _context.Publishers.AddAsync(publisher);
+                    await _context.SaveChangesAsync();  
+                }
+                game.PublisherId = publisher.Id;
+
                 // Categories
                 game.Categories = gameInfoFromRequest.Categories ?? new List<string>();
 
@@ -176,10 +204,10 @@ namespace Tadas_SOA_Repeat_CA.Controllers
             ModelState.AddModelError("", "Invalid Parameter value 'string'");
             return BadRequest(ModelState);
         }
-        /*
-         Old Patch Route with local storage
 
-         Cannot figure out how to convert to use ApplicationDbContext
+        /*
+        NOTE: Old Patch Route with local storage
+        NOTE: Cannot figure out how to convert to use ApplicationDbContext
         
         [HttpPatch("{id:int}", Name = "UpdatePartialGame")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
