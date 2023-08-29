@@ -21,14 +21,14 @@ namespace Tadas_SOA_Repeat_CA.Controllers
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult<IEnumerable<GameDTO>> GetGames()
+        public async Task<ActionResult<IEnumerable<GameDTO>>> GetGames()
         {
             _logger.LogInformation("Getting All Games");
 
-            var games = _context.Games
+            var games = await _context.Games
                                 .Include(g => g.Developer)
                                 .Include(g => g.Publisher)
-                                .ToList();
+                                .ToListAsync();
 
             var gameDTOs = games.Select(g => g.ToDTO()).ToList();
 
@@ -39,14 +39,14 @@ namespace Tadas_SOA_Repeat_CA.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GameDTO))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<GameDTO> GetGame(int id)
+        public async Task<ActionResult<GameDTO>> GetGame(int id)
         {
             if (id == 0)
             {
                 _logger.LogError("Get Game Error with ID: " + id);
                 return BadRequest();
             }
-            var game = _context.Games.FirstOrDefault(u => u.Id == id);
+            var game = await _context.Games.FirstOrDefaultAsync(u => u.Id == id);
             if (game == null)
             {
                 return NotFound($"Game with ID {id} not found.");
@@ -96,11 +96,23 @@ namespace Tadas_SOA_Repeat_CA.Controllers
                 await _context.SaveChangesAsync();
             }
 
+            // Handle categories
+            foreach (var categoryName in gameDTO.Categories)
+            {
+                var category = await _context.Categories.FirstOrDefaultAsync(c => c.Name.ToLower() == categoryName.ToLower());
+                if (category == null)
+                {
+                    category = new Category { Name = categoryName };
+                    await _context.Categories.AddAsync(category);
+                }
+            }
+            await _context.SaveChangesAsync();
+
             // Create game with categories from DTO
             var game = new Game
             {
                 Name = gameDTO.Name,
-                Categories = gameDTO.Categories, // Directly assigning categories from DTO
+                Categories = gameDTO.Categories, // Categories will handle serialization to CategoriesJson
                 PublisherId = publisher.Id,
                 DeveloperId = developer.Id,
                 ReleaseDate = gameDTO.ReleaseDate,
@@ -121,22 +133,21 @@ namespace Tadas_SOA_Repeat_CA.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public IActionResult RemoveGame(int id)
+        public async Task<IActionResult> RemoveGame(int id)
         {
             if (id <= 0)
             {
                 _logger.LogError("Delete Game Error with ID: " + id);
-                return BadRequest();
+                ModelState.AddModelError("InvalidRequest", $"Invalid id: {id} requested");
+                return BadRequest(ModelState);
             }
 
-            var game = _context.Games.FirstOrDefault(u => u.Id == id);
+            var game = await _context.Games.FirstOrDefaultAsync(u => u.Id == id);
             if (game == null)
-            {
                 return NotFound($"Game with ID {id} not found.");
-            }
 
             _context.Games.Remove(game);
-            _context.SaveChanges();
+            _context.SaveChangesAsync();
 
             return NoContent();
         }
@@ -148,8 +159,11 @@ namespace Tadas_SOA_Repeat_CA.Controllers
         public async Task<IActionResult> UpdateGame(int id, [FromBody] GameDTO gameInfoFromRequest)
         {
             if (gameInfoFromRequest == null || id != gameInfoFromRequest.Id)
+            {
+                _logger.LogError($"Put Game Error Invalid Reqeust: Null or Invalid ID: {id}");
                 return BadRequest();
-
+            }
+            
             var game = await _context.Games
                                      .Include(g => g.Developer)
                                      .Include(g => g.Publisher)
@@ -166,17 +180,16 @@ namespace Tadas_SOA_Repeat_CA.Controllers
                 game.Name = gameInfoFromRequest.Name;
                 game.Owned = gameInfoFromRequest.Owned;
 
-                // Handle developer
+                // In here we check for a developer if it doesnt exist we create a new one and proceed with updating the game Model
                 var developer = await _context.Developers.FirstOrDefaultAsync(d => d.Name.ToLower() == gameInfoFromRequest.Developer.ToLower());
                 if (developer == null)
                 {
                     developer = new Developer
                     {
                         Name = gameInfoFromRequest.Developer
-                        // Add other properties if you have them in the DTO
                     };
                     await _context.Developers.AddAsync(developer);
-                    await _context.SaveChangesAsync();  // Save the developer immediately to get an ID
+                    await _context.SaveChangesAsync();  // Saving the developer now so an ID gets created and then we use it to update the Game Model
                 }
                 game.DeveloperId = developer.Id;
 
@@ -189,11 +202,11 @@ namespace Tadas_SOA_Repeat_CA.Controllers
                         // Add other properties if you have them in the DTO
                     };
                     await _context.Publishers.AddAsync(publisher);
-                    await _context.SaveChangesAsync();  
+                    await _context.SaveChangesAsync();  // Saving Publisher aswell to get an ID
                 }
                 game.PublisherId = publisher.Id;
 
-                // Categories
+                // Categories can be empty on request
                 game.Categories = gameInfoFromRequest.Categories ?? new List<string>();
 
                 await _context.SaveChangesAsync();
@@ -204,6 +217,7 @@ namespace Tadas_SOA_Repeat_CA.Controllers
             ModelState.AddModelError("", "Invalid Parameter value 'string'");
             return BadRequest(ModelState);
         }
+
 
         /*
         NOTE: Old Patch Route with local storage

@@ -21,12 +21,12 @@ namespace Tadas_SOA_Repeat_CA.Controllers
 
         [HttpGet(Name ="GetAllPublishers")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult<IEnumerable<PubDTO>> GetPublishers()
+        public async Task<ActionResult<IEnumerable<PubDTO>>> GetPublishers()
         {
             _logger.LogInformation("Getting All Publishers");
 
-            var publishers = _context.Publishers
-                                .ToList();
+            var publishers = await _context.Publishers
+                                .ToListAsync();
 
             var pubDTO = publishers.Select(p => p.ToDTO()).ToList();
 
@@ -37,14 +37,14 @@ namespace Tadas_SOA_Repeat_CA.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PubDTO))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<PubDTO> GetPublisher(int id)
+        public async Task<ActionResult<PubDTO>> GetPublisher(int id)
         {
             if (id == 0)
             {
                 _logger.LogError("Get Publisher Error with ID: " + id);
                 return BadRequest();
             }
-            var publisher = _context.Publishers.FirstOrDefault(p => p.Id == id);
+            var publisher = await _context.Publishers.FirstOrDefaultAsync(p => p.Id == id);
             if (publisher == null)
             {
                 return NotFound($"Publisher with ID {id} not found.");
@@ -95,7 +95,7 @@ namespace Tadas_SOA_Repeat_CA.Controllers
             if (id <= 0)
             {
                 _logger.LogError($"Delete Publisher Error: Invalid ID {id}");
-                return BadRequest("Invalid ID provided.");
+                return BadRequest();
             }
 
             var publisher = await _context.Publishers.FindAsync(id);

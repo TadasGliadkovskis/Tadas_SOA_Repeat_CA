@@ -24,6 +24,7 @@ namespace Tadas_SOA_Repeat_CA.Models
         public string Name { get; set; }
         public string CategoriesJson { get; set; }
 
+        // Allows bypass of creating a many to many relationship tables
         [NotMapped]
         public List<string> Categories
         {

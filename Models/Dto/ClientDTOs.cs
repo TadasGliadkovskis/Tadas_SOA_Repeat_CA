@@ -28,4 +28,10 @@ namespace Tadas_SOA_Repeat_CA.Models.Dto
         public int Id { get; set; }
         public string Name { get; set; }
     }
+
+    public class CategoryDTO
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+    }
 }

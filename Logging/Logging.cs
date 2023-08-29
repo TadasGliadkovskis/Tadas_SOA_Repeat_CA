@@ -1,5 +1,6 @@
 ﻿namespace Tadas_SOA_Repeat_CA.Logging
 {
+
     public class Logging : ILogging
     {
         public void Log(string message, string type)
